@@ -1,1 +1,1 @@
-# protecting-privacy-in-knowledge-graphs-with-personalized-anonymization
+# Protecting Privacy in Knowledge Graphs with Personalized Anonymization
