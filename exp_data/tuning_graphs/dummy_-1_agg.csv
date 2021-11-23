@@ -1,0 +1,2 @@
+num_anonymized_entities,info_loss_args_str,num_fake_edges,gen,enforcer_str,num_anonymized_fake_entities,calgo_str,info_loss,data,alpha_dm,num_anonymized_edges,calgo,anonymized_degree_anonymity,anonymized_attribute_anonymity,gen_str,enforcer,handler_str,sample,num_removed_edges,anonymized_anonymity,num_raw_edges,alpha_adm,gen_n,adm,dm,am,radm,num_raw_entities,removed_entities
+5,"0.50,0.50",17,static,sr,0,km#max,adm,dummy,0.5,28,km,2,5,static#0,sr,n,-1,0,2,11,0.5,0,0.33166666666666655,0.08,0.5833333333333333,0.33166666666666655,5,0

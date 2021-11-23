@@ -1,0 +1,1 @@
+python run_anonymize_kg.py --data=freebase --args_modes=ms,vac --gen_list=te,te,zipf,zipf --gen_args_list=2,5,1-5,50,5-2,5,1-5,50,5 --calgo_list=hdbscan,hdbscan,hdbscan,km,km,km,vac --calgo_args_list=min,mean,max,min,mean,max,max --enforcer=ms --max_dist_list=0,0.25,0.5,0.75,1 --log=i --workers=10

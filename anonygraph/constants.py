@@ -1,0 +1,51 @@
+K_MEDOIDS_CLUSTERING_ALGORITHM = "km"
+HDBSCAN_CLUSTERING_ALGORITHM = "hdbscan"
+PSIZE_CLUSTERING_ALGORITHM = "vac"
+
+MERGE_SPLIT_ENFORCER = "ms"
+SR_ENFORCER = "sr"
+KMEANS_PARTITION_ENFORCER = "kp"
+
+NO_REMOVAL_HANDLER = "n"
+COST_ZSCORE_HANDLER = "cz"
+
+
+SAME_K_GENERATOR = "same"
+NORM_LIST_K_GENERATOR = "norm"
+RATIO_NORM_GENERATOR = "rnorm"
+TOTAL_DEGREE_GENERATOR = "td"
+RANGE_TOTAL_EDGES_GENERATOR = "te"
+RATIO_ZIPF_GENERATOR = "rzipf"
+RANGE_ZIPF_GENERATOR = "zipf"
+STATIC_GENERATOR = "static"
+
+
+ADM_METRIC = "adm"
+DM_METRIC = "dm"
+AM_METRIC = "am"
+REMOVED_ENTITIES_METRIC = "removed_entities"
+OUT_DM_METRIC = "odm"
+IN_DM_METRIC = "idm"
+NUM_INVALID_ANONYMITY_CLUSTERS_METRIC = "is_invalid_anonymity_clusters"
+NUM_BIG_CLUSTERS_METRIC = "num_big_clusters"
+FAKE_ENTITIES_METRIC = "num_anonymized_fake_entities"
+REAL_ENTITIES_METRIC = "num_anonymized_real_entities"
+REAL_EDGES_METRIC = "num_real_edges"
+FAKE_EDGES_METRIC = "num_fake_edges"
+RAW_ENTITIES_METRIC = "num_raw_entities"
+ANONYMIZED_ENTITIES_METRIC = "num_anonymized_entities"
+RAW_EDGES_METRIC = "num_raw_edges"
+ANONYMIZED_EDGES_METRIC = "num_anonymized_edges"
+ANONYMIZED_ANONYMITY_METRIC = "anonymized_anonymity"
+ANONYMIZED_ATTRIBUTE_ANONYMITY_METRIC = "anonymized_attribute_anonymity"
+ANONYMIZED_DEGREE_ANONYMITY_METRIC = "anonymized_degree_anonymity"
+ANONYMIZED_AVERAGE_CLUSTERING_COEFFICIENT = "anonymized_acc"
+RAW_AVERAGE_CLUSTERING_COEFFICIENT = "raw_acc"
+RATIO_AVERAGE_CLUSTERING_COEFFICIENT = "acc"
+REMAINING_ADM_METRIC = "radm"
+REMOVED_EDGES_METRIC = "num_removed_edges"
+
+ASSERTION_VARIABLE = "assertion"
+
+# visualization
+ALGO_KEY_COL = "algo_key"

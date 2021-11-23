@@ -1,0 +1,17 @@
+
+        \begin{table}[]
+    \caption{}\label{}
+    \footnotesize
+        \begin{tabularx}{\linewidth}{ c  l  y  y  y  y  y  y  y }
+        & \multicolumn{1}{c}{}         & \multicolumn{3}{c}{hdbscan} & \multicolumn{3}{c}{k-medoids} & \multirow{2}{*}{VAC} \\ \cmidrule{3-5}\cmidrule{6-8}
+        Data                      & \multicolumn{1}{c}{Settings} & min      & mean    & max     & min      & mean     & max      &                      \\ \midrule
+        \multirow{4}{*}{Freebase} & $te\#2,5,1$ & 0.321 & 0.321 & 0.331 & 0.004 & 0.003 & 0.015 & 0.0007 \\
+  & $te\#5,50,5$ & 0.331 & 0.331 & 0.331 & 0.015 & 0.039 & 0.096 & 0.0097 \\
+  & $zipf\#2,5,1,2$ & 0.321 & 0.321 & 0.331 & 0.004 & 0.004 & 0.017 & 0.0012 \\
+  & $zipf\#5,50,5,2$ & 0.331 & 0.331 & 0.331 & 0.016 & 0.014 & 0.080 & 0.0090 \\\midrule 
+\multirow{4}{*}{Yago} & $te\#2,5,1$ & 0.270 & 0.270 & 0.354 & 0.008 & 0.009 & 0.028 & 0.0004 \\
+  & $te\#5,50,5$ & 0.354 & 0.354 & 0.470 & 0.028 & 0.032 & 0.092 & 0.0014 \\
+  & $zipf\#2,5,1,2$ & 0.270 & 0.270 & 0.354 & 0.009 & 0.009 & 0.028 & 0.0007 \\
+  & $zipf\#5,50,5,2$ & 0.354 & 0.354 & 0.470 & 0.030 & 0.028 & 0.091 & 0.0045 \\\midrule 
+\end{tabularx}
+        \end{table}

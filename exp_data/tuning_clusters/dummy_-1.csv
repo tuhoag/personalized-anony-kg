@@ -1,0 +1,13 @@
+data,sample,anony_mode,k_gen,gen_str,gen_n,info_loss,alpha_adm,alpha_dm,handler_str,calgo,enforcer,enforcer_str,max_dist,adm,dm,am,removed_entities,num_raw_entities
+dummy,-1,anony,rnorm,"rnorm#1,3",0,adm,0.50,0.50,cz#3.0,km,kp,kp#0.50,0.5,0.405,0.16,0.65,0,5
+dummy,-1,anony,rnorm,"rnorm#1,3",0,adm,0.50,0.50,cz#3.0,km,kp,kp#1.00,1.0,0.405,0.16,0.65,0,5
+dummy,-1,anony,rnorm,"rnorm#1,3",0,adm,0.50,0.50,cz#3.5,km,kp,kp#0.50,0.5,0.405,0.16,0.65,0,5
+dummy,-1,anony,rnorm,"rnorm#1,3",0,adm,0.50,0.50,cz#3.5,km,kp,kp#1.00,1.0,0.405,0.16,0.65,0,5
+dummy,-1,anony,rnorm,"rnorm#1,3",1,adm,0.50,0.50,cz#3.0,km,kp,kp#0.50,0.5,0.05000000000000001,0.03333333333333333,0.06666666666666667,0,5
+dummy,-1,anony,rnorm,"rnorm#1,3",1,adm,0.50,0.50,cz#3.0,km,kp,kp#1.00,1.0,0.05000000000000001,0.03333333333333333,0.06666666666666667,0,5
+dummy,-1,anony,rnorm,"rnorm#1,3",1,adm,0.50,0.50,cz#3.5,km,kp,kp#0.50,0.5,0.05000000000000001,0.03333333333333333,0.06666666666666667,0,5
+dummy,-1,anony,rnorm,"rnorm#1,3",1,adm,0.50,0.50,cz#3.5,km,kp,kp#1.00,1.0,0.05000000000000001,0.03333333333333333,0.06666666666666667,0,5
+dummy,-1,anony,rnorm,"rnorm#1,3",2,adm,0.50,0.50,cz#3.0,km,kp,kp#0.50,0.5,0.0125,0.0,0.025,0,5
+dummy,-1,anony,rnorm,"rnorm#1,3",2,adm,0.50,0.50,cz#3.0,km,kp,kp#1.00,1.0,0.0125,0.0,0.025,0,5
+dummy,-1,anony,rnorm,"rnorm#1,3",2,adm,0.50,0.50,cz#3.5,km,kp,kp#0.50,0.5,0.0125,0.0,0.025,0,5
+dummy,-1,anony,rnorm,"rnorm#1,3",2,adm,0.50,0.50,cz#3.5,km,kp,kp#1.00,1.0,0.0125,0.0,0.025,0,5

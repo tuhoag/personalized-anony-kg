@@ -1,0 +1,6 @@
+RAW_DATA_PATH = "./data"
+OUTPUT_DATA_PATH = "./outputs"
+EXP_DATA_PATH = "./exp_data"
+FIG_PATH = "./exp_outputs"
+MODEL_CHECKPOINT_PATH = "./checkpoints"
+CHECKPOINT_FILENAME = "cp.ckpt"
