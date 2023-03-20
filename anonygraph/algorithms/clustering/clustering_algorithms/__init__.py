@@ -4,6 +4,7 @@ import logging
 
 from .k_medoids import KMedoidsAlgorithm
 from .psize import PSizeAlgorithm
+from .permule import PermuleAlgorithm
 from anonygraph.constants import *
 
 logger = logging.getLogger(__name__)
@@ -12,6 +13,7 @@ def get_clustering_algo(calgo_name):
         K_MEDOIDS_CLUSTERING_ALGORITHM: run_k_medoids_clustering,
         PSIZE_CLUSTERING_ALGORITHM: run_psize_clustering,
         HDBSCAN_CLUSTERING_ALGORITHM: run_hdbscan_clustering,
+        PERMULE_CLUSTERING_ALGORITHM: run_permule_clustering,
     }
 
     if calgo_name not in calgo_fn_dict:
@@ -60,5 +62,10 @@ def run_hdbscan_clustering(dist_matrix, entity_id2idx_dict, entity_idx2id_dict, 
 
 def run_psize_clustering(dist_matrix, entity_id2idx_dict, entity_idx2id_dict, entity_id2k_dict, args):
     clustering_algo = PSizeAlgorithm()
+    clusters = clustering_algo.run(dist_matrix, entity_id2idx_dict, entity_idx2id_dict, entity_id2k_dict)
+    return clusters
+
+def run_permule_clustering(dist_matrix, entity_id2idx_dict, entity_idx2id_dict, entity_id2k_dict, args):
+    clustering_algo = PermuleAlgorithm()
     clusters = clustering_algo.run(dist_matrix, entity_id2idx_dict, entity_idx2id_dict, entity_id2k_dict)
     return clusters

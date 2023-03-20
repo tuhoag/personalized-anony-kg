@@ -159,7 +159,7 @@ def get_clustering_str(calgo_name, args):
     if calgo_name in [K_MEDOIDS_CLUSTERING_ALGORITHM, HDBSCAN_CLUSTERING_ALGORITHM]:
         cargs_str = get_args_str("calgo_args", args)
         return "{}#{}".format(calgo_name, cargs_str)
-    elif calgo_name in [PSIZE_CLUSTERING_ALGORITHM]:
+    elif calgo_name in [PSIZE_CLUSTERING_ALGORITHM, PERMULE_CLUSTERING_ALGORITHM]:
         return calgo_name
     else:
         raise NotImplementedError("Unsupported clustering algorithm: {}".format(calgo_name))
