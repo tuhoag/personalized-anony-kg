@@ -24,11 +24,16 @@ class PermuleAlgorithm:
             cluster.add_entity(entity_id=entity1_idx)
 
             idx = 0
-            while(len(remaining_entity_ids) > 0):
-                if dist_matrix[entity1_idx, idx] == 0:
+            while(len(remaining_entity_ids) > 0 and idx < len(remaining_entity_ids)):
+                # logger.debug("idx: {} - entities: {},{}".format(idx, entity1_idx, remaining_entity_ids[idx]))
+                if dist_matrix[entity1_idx, remaining_entity_ids[idx]] == 0:
                     entity2_idx = remaining_entity_ids.pop(idx)
                     cluster.add_entity(entity_id=entity2_idx)
                 else:
                     idx += 1
+                # logger.debug("cluster: {}".format(len(cluster)))
 
+            clusters.add_cluster(cluster)
+        logger.debug("num users: {} - clusters: {}".format(len(id2idx_dict), len(clusters)))
+        # raise Exception()
         return clusters

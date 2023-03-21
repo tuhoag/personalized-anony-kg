@@ -175,8 +175,8 @@ def get_enforcer_name(enforcer_name, args):
 
     if enforcer_name in [MERGE_SPLIT_ENFORCER, KMEANS_PARTITION_ENFORCER]:
         return "{}#{}".format(enforcer_name, args_str)
-    elif enforcer_name == SR_ENFORCER:
-        return SR_ENFORCER
+    elif enforcer_name in [SR_ENFORCER, PERMULE_ENFORCER]:
+        return enforcer_name
     else:
         raise NotImplementedError("Unsupported enforcer: {}".format(enforcer_name))
 

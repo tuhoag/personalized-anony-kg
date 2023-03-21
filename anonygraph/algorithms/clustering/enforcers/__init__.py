@@ -1,3 +1,4 @@
+from .permule_enforcer import PermuleEnforcer
 from .small_removal_enforcer import SmallRemovalEnforcer
 from .merge_split_enforcer import MergeSplitEnforcer
 from .same_size_merge_split_enforcer import SameSizeMergeSplitEnforcer
@@ -12,5 +13,7 @@ def get_enforcer(enforcer_name, args):
         return MergeSplitEnforcer(enforcer_args)
     elif enforcer_name == KMEANS_PARTITION_ENFORCER:
         return SameSizeMergeSplitEnforcer(enforcer_args)
+    elif enforcer_name == PERMULE_ENFORCER:
+        return PermuleEnforcer(enforcer_args)
     else:
         raise Exception("Do not support enforcer: {}".format(enforcer_name))
