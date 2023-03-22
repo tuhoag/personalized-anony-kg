@@ -4,5 +4,5 @@ from .dummy_graph import DummyGraph
 from .freebase_graph import FreebaseGraph
 from .yago_graph import YagoGraph
 from .german_graph import GermanCreditGraph
-
+from .coil_graph import CoilGraph
 from .pair_dist_sequence import PairDistanceSequence
