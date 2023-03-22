@@ -24,8 +24,8 @@ python generate_k_values.py --data=freebase --gen=te --gen_args=2,5,1
 ```
 Here, 2,5,1 is the range start from 2 to 5 with the increment of 1. The last parameter of zipf setting is zipf distribution parameter, which is 2 in the above code. The first three commands generate k values three times.
 
-## Distance Matrix Generation: 
-Use the file genrate_dist_matrix.py to generate the distance matrix of each dataset. You can use the following code to generate distance matrix of Freebase:
+## Distance Matrix Generation:
+Use the file generate_dist_matrix.py to generate the distance matrix of each dataset. You can use the following code to generate distance matrix of Freebase:
 ```
 python generate_dist_matrix.py --data=freebase --gen=te --gen_args=2,5,1,2 --workers=1
 python generate_dist_matrix.py --data=freebase --gen=te --gen_args=2,5,1 --workers=1
@@ -45,7 +45,7 @@ python generate_raw_clusters.py --data=freebase --gen=zipf --gen_args=2,5,1,2 --
 python generate_raw_clusters.py --data=freebase --gen=zipf --gen_args=2,5,1,2 --calgo=km --calgo_args=max
 python generate_raw_clusters.py --data=freebase --gen=zipf --gen_args=2,5,1,2 --calgo=km --calgo_args=min
 python generate_raw_clusters.py --data=freebase --gen=zipf --gen_args=2,5,1,2 --calgo=km --calgo_args=mean
-python generate_raw_clusters.py --data=freebase --gen=zipf --gen_args=2,5,1,2 --calgo=vac 
+python generate_raw_clusters.py --data=freebase --gen=zipf --gen_args=2,5,1,2 --calgo=vac
 ```
 Here, you can pass ```gen_n```(default=0) to specify this generation relies on which k values that are generated.
 

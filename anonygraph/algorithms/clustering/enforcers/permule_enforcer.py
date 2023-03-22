@@ -97,15 +97,15 @@ def merge_invalid_clusters(clusters, invalid_clusters_ids, dist_matrix, entity_i
         logger.debug("new_clusters: {}".format(new_clusters))
         logger.debug("new_valid_clusters_ids: {}".format(new_valid_clusters_ids))
         logger.debug("new_invalid_clusters_ids: {}".format(new_invalid_clusters_ids))
-        logger.debug(sorted_clusters_dist)
-        logger.debug("availability: {}".format(availability))
+        # logger.debug(sorted_clusters_dist)
+        # logger.debug("availability: {}".format(availability))
         logger.debug("num_invalid_clusters: {}".format(num_invalid_clusters))
 
         smallest_dist, cid1, cid2 = sorted_clusters_dist.pop(0)
 
         # logger.debug("smallest_dist: {} - cidx1: {} - cidx2: {}".format(smallest_dist, cidx1, cidx2))
 
-        if availability[cid2]:
+        if availability[cid1] and availability[cid2]:
             c1 = new_clusters[cid1]
             c2 = new_clusters[cid2]
 
@@ -114,7 +114,12 @@ def merge_invalid_clusters(clusters, invalid_clusters_ids, dist_matrix, entity_i
 
             availability[cid1] = False
             availability[cid2] = False
-            new_invalid_clusters_ids.remove(cid1)
+
+            if cid1 in new_invalid_clusters_ids:
+                new_invalid_clusters_ids.remove(cid1)
+
+            if cid2 in new_invalid_clusters_ids:
+                new_invalid_clusters_ids.remove(cid2)
 
 
             new_clusters.append(cluster)
@@ -125,7 +130,7 @@ def merge_invalid_clusters(clusters, invalid_clusters_ids, dist_matrix, entity_i
 
             if len(c2) < max_k:
                 num_invalid_clusters -= 1
-                new_invalid_clusters_ids.remove(cid2)
+                # new_invalid_clusters_ids.remove(cid2)
 
             if len(cluster) < max_k:
                 # new_valid_clusters.append(cluster)
@@ -141,7 +146,7 @@ def merge_invalid_clusters(clusters, invalid_clusters_ids, dist_matrix, entity_i
                     logger.debug("added distance: {}".format((dist, idx2, new_cluster_idx)))
                     dist = calculate_distance_between_clusters(new_clusters[new_cluster_idx], new_clusters[idx2], dist_matrix, entity_id2idx_dict)
 
-                    sorted_clusters_dist.add((dist, idx2, new_cluster_idx))
+                    sorted_clusters_dist.add((dist, new_cluster_idx, idx2))
 
     new_available_clusters = Clusters()
     for cid, cluster in enumerate(new_clusters):
@@ -164,7 +169,7 @@ def calculate_distance_between_clusters(invalid_cluster1, invalid_cluster2, dist
 
 def calculate_distance_from_entity_to_cluster(entity_id, cluster, dist_matrix, entity_id2idx_dict):
     entity_idx = entity_id2idx_dict[entity_id]
-    logger.debug(cluster)
+    # logger.debug(cluster)
     cluster_entity_idxes = [entity_id2idx_dict[cluster_entity_id] for cluster_entity_id in cluster]
 
     distances = dist_matrix[entity_idx, cluster_entity_idxes]

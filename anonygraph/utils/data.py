@@ -22,6 +22,7 @@ def load_graph_from_raw_data(data_name, sample, args):
         # "gplus": data.GplusGraph,
         "email": data.EmailGraph,
         "yago": data.YagoGraph,
+        "german": data.GermanCreditGraph,
     }
 
     data_fn = data_fn_dict.get(data_name)

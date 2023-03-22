@@ -1,3 +1,4 @@
 *.pyc
 /data
 /outputs
+*.DS_Store
