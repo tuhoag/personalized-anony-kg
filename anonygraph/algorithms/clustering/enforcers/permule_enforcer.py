@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 class PermuleEnforcer(BaseEnforcer):
     def __init__(self, args):
         super().__init__(PERMULE_ENFORCER, args)
+        self.num_workers = args["workers"]
 
     def call(self, clusters, dist_matrix, entity_id2idx_dict, entity_idx2id_dict, entity_id2k_dict):
         # invalid removal
@@ -38,7 +39,7 @@ class PermuleEnforcer(BaseEnforcer):
         # merge
 
         logger.info("merging invalid clusters")
-        new_clusters = merge_invalid_clusters(clusters, new_dist_matrix, entity_id2idx_dict, entity_id2k_dict)
+        new_clusters = merge_invalid_clusters(clusters, new_dist_matrix, entity_id2idx_dict, entity_id2k_dict, self.num_workers)
 
         # test invalid clusters
         logger.info("after merging users to clusters")
@@ -67,7 +68,7 @@ def get_valid_and_invalid_clusters_ids(clusters, entity_id2k_dict):
     # logger.debug("clusters: {}".format(valid_clusters))
     return max_k, valid_clusters_ids, invalid_clusters_ids
 
-def merge_invalid_clusters(clusters, dist_matrix, entity_id2idx_dict, entity_id2k_dict):
+def merge_invalid_clusters(clusters, dist_matrix, entity_id2idx_dict, entity_id2k_dict, num_workers):
     max_k, valid_cluster_ids, invalid_cluster_ids = get_valid_and_invalid_clusters_ids(clusters, entity_id2k_dict)
 
     all_clusters = [cluster.copy() for cluster in clusters]
@@ -124,6 +125,30 @@ def merge_invalid_clusters(clusters, dist_matrix, entity_id2idx_dict, entity_id2
     logger.debug(final_clusters)
     # raise Exception()
     return final_clusters
+
+def calculate_min_distance(all_clusters, invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict):
+    cache_dist = {}
+    min_dist = sys.maxsize
+    nearest_cluster_ids = None
+    for c_in_id in invalid_cluster_ids:
+        for c_id in available_cluster_ids:
+            if c_id == c_in_id:
+                continue
+
+            if c_in_id < c_id:
+                key = (c_in_id, c_id)
+            else:
+                key = (c_id, c_in_id)
+            dist = cache_dist.get(key)
+            if dist is None:
+                dist = calculate_distance_between_clusters(all_clusters[c_in_id], all_clusters[c_id], dist_matrix, entity_id2idx_dict)
+                cache_dist[key] = dist
+
+            if dist < min_dist:
+                min_dist = dist
+                nearest_cluster_ids = (c_in_id, c_id)
+
+    return nearest_cluster_ids
 
 def merge_invalid_clusters1(clusters, dist_matrix, entity_id2idx_dict, entity_id2k_dict):
     max_k, valid_cluster_ids, invalid_cluster_ids = get_valid_and_invalid_clusters_ids(clusters, entity_id2k_dict)
