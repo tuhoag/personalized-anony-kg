@@ -107,8 +107,8 @@ def merge_invalid_clusters(clusters, invalid_clusters_ids, dist_matrix, entity_i
     availability = [True for _ in new_clusters]
 
     logger.info("merging invalid clusters for max_k={}".format(max_k))
-    while num_invalid_clusters > 0:
-        logger.info("remaining invalid clusters: {} - {}".format(num_invalid_clusters, len(new_invalid_clusters_ids)))
+    while len(new_invalid_clusters_ids) > 0:
+        logger.info("remaining invalid clusters: {} - {}".format(len(new_invalid_clusters_ids), len(sorted_clusters_dist)))
 
         logger.debug("new_clusters: {}".format(new_clusters))
         logger.debug("new_valid_clusters_ids: {}".format(new_valid_clusters_ids))
@@ -130,6 +130,7 @@ def merge_invalid_clusters(clusters, invalid_clusters_ids, dist_matrix, entity_i
 
             availability[cid1] = False
             availability[cid2] = False
+
 
             if cid1 in new_invalid_clusters_ids:
                 new_invalid_clusters_ids.remove(cid1)
@@ -155,8 +156,19 @@ def merge_invalid_clusters(clusters, invalid_clusters_ids, dist_matrix, entity_i
             # new_clusters.append(cluster)
             # new_invalid_clusters_ids.append(cluster)
             # availability.append(True)
-            logger.debug("updating distances")
 
+            logger.debug("removing invalid dists")
+            idx2 = 0
+            selected_cluster_ids = [cid1, cid2]
+
+            while idx2 < len(sorted_clusters_dist):
+                _, cid1_new, cid2_new = sorted_clusters_dist[idx2]
+                if cid1_new in selected_cluster_ids or cid2_new in selected_cluster_ids:
+                    sorted_clusters_dist.pop(idx2)
+
+                idx2 += 1
+
+            logger.debug("updating distances")
             for idx2 in range(len(new_clusters) - 1):
                 if availability[idx2]:
                     logger.debug("added distance: {}".format((dist, idx2, new_cluster_idx)))
