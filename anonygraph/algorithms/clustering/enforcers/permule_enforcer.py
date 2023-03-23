@@ -3,6 +3,7 @@ import logging
 import numpy as np
 import sys
 from sortedcontainers import SortedList
+from tqdm import tqdm
 
 import anonygraph.utils.test as tutils
 from anonygraph.algorithms import cluster, clustering
@@ -80,7 +81,7 @@ def merge_invalid_clusters(clusters, invalid_clusters_ids, dist_matrix, entity_i
 
     logger.info("finding nearest clusters for {}/{} invalid ones".format(len(invalid_clusters_ids), len(new_clusters)))
 
-    for idx, cid1 in enumerate(invalid_clusters_ids):
+    for idx, cid1 in tqdm(enumerate(invalid_clusters_ids)):
         # logger.info("found nearest cluster for {}/{}".format(idx, len(invalid_clusters_ids)))
         cluster1 = new_clusters[cid1]
         min_dist = sys.maxsize
@@ -129,33 +130,17 @@ def merge_invalid_clusters(clusters, invalid_clusters_ids, dist_matrix, entity_i
             availability[cid1] = False
             availability[cid2] = False
 
-
             if cid1 in new_invalid_clusters_ids:
                 new_invalid_clusters_ids.remove(cid1)
 
             if cid2 in new_invalid_clusters_ids:
                 new_invalid_clusters_ids.remove(cid2)
 
-
             new_clusters.append(cluster)
             availability.append(True)
             new_cluster_idx = len(new_clusters) - 1
 
-            num_invalid_clusters -= 1
-
-            if len(c2) < max_k:
-                num_invalid_clusters -= 1
-                # new_invalid_clusters_ids.remove(cid2)
-
-            if len(cluster) < max_k:
-                # new_valid_clusters.append(cluster)
-                num_invalid_clusters += 1
-                new_invalid_clusters_ids.add(new_cluster_idx)
-            # new_clusters.append(cluster)
-            # new_invalid_clusters_ids.append(cluster)
-            # availability.append(True)
-
-            logger.info("removing invalid dists")
+            logger.debug("removing invalid dists")
             idx2 = 0
             selected_cluster_ids = [cid1, cid2]
             n_removed_dists = 0
@@ -165,12 +150,15 @@ def merge_invalid_clusters(clusters, invalid_clusters_ids, dist_matrix, entity_i
                     sorted_clusters_dist.pop(idx2)
                     n_removed_dists += 1
                 idx2 += 1
-            logger.info("removed {}".format(n_removed_dists))
+            logger.debug("removed {}".format(n_removed_dists))
 
-            logger.info("updating distances")
+            logger.debug("updating distances")
+            is_new_cluster_invalid = len(cluster) < max_k
+            if is_new_cluster_invalid:
+                new_invalid_clusters_ids.add(new_cluster_idx)
             n_added_dists = 0
             for idx2 in range(len(new_clusters) - 1):
-                if availability[idx2]:
+                if (availability[idx2]) and (is_new_cluster_invalid or len(len(new_clusters[idx2]) < max_k)):
                     logger.debug("added distance: {}".format((dist, idx2, new_cluster_idx)))
                     dist = calculate_distance_between_clusters(new_clusters[new_cluster_idx], new_clusters[idx2], dist_matrix, entity_id2idx_dict)
 
