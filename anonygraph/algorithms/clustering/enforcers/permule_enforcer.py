@@ -70,22 +70,94 @@ def get_valid_and_invalid_clusters_ids(clusters, entity_id2k_dict):
     # logger.debug("clusters: {}".format(valid_clusters))
     return max_k, valid_clusters_ids, invalid_clusters_ids
 
+def initialize_sorted_dist(all_clusters, c_in_id, invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict):
+    sorted_dist = SortedList()
+
+    for c_id in available_cluster_ids:
+        if c_id == c_in_id:
+            continue
+
+        dist = calculate_distance_between_clusters(all_clusters[c_in_id], all_clusters[c_id], dist_matrix, entity_id2idx_dict)
+
+        sorted_dist.add((dist, c_id))
+    return sorted_dist
+
+def initialize_cache_dist(all_clusters, invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict):
+    cache_dist2 = {}
+
+    for c_in_id in invalid_cluster_ids:
+        sorted_dist = initialize_sorted_dist(all_clusters, c_in_id, invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict)
+
+        cache_dist2[c_in_id] = sorted_dist
+
+    logger.debug("initialial invalid_cluster_ids: {}".format(invalid_cluster_ids))
+    logger.debug("initialial cache_dist2: {}".format(cache_dist2))
+    return cache_dist2
+
 def merge_invalid_clusters(clusters, dist_matrix, entity_id2idx_dict, entity_id2k_dict, num_workers):
     max_k, valid_cluster_ids, invalid_cluster_ids = get_valid_and_invalid_clusters_ids(clusters, entity_id2k_dict)
 
     all_clusters = [cluster.copy() for cluster in clusters]
     available_cluster_ids = set(range(len(clusters)))
 
-    logger.info("finding nearest clusters for {}/{} invalid ones".format(len(invalid_cluster_ids), len(all_clusters)))
+    # logger.info("finding nearest clusters for {}/{} invalid ones".format(len(invalid_cluster_ids), len(all_clusters)))
+    logger.info("initializing cache dist")
+    cache_dist2 = initialize_cache_dist(all_clusters, invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict)
 
-    cache_dist = {}
+    logger.debug(cache_dist2)
+    # raise Exception()
+    # cache_dist = {}
+    logger.info("start merging")
     while(len(invalid_cluster_ids) > 0):
+        logger.debug("all_clusters: {}".format(all_clusters))
         start_time = time.time()
-        nearest_cluster_ids = calculate_min_distance(all_clusters, invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict, num_workers)
+
+        # find smallest dist invalid cluster
+        min_dist = sys.maxsize
+        nearest_cluster_ids = None
+        for c_in_id in invalid_cluster_ids:
+            # logger.debug(invalid_cluster_ids)
+            # logger.debug(cache_dist2)
+            c_sorted_dist = cache_dist2[c_in_id]
+
+            dist, c_id = c_sorted_dist.pop(0)
+            while(c_id not in available_cluster_ids):
+                dist, c_id = c_sorted_dist.pop(0)
+
+            if dist < min_dist:
+                min_dist = dist
+                nearest_cluster_ids = (c_in_id, c_id)
+
+
+        # nearest_cluster_ids = calculate_min_distance(all_clusters, invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict, cache_dist, num_workers)
+        # min_dist = sys.maxsize
+        # nearest_cluster_ids = None
+
+        # for c_in_id in invalid_cluster_ids:
+        #     for c_id in available_cluster_ids:
+        #         if c_id == c_in_id:
+        #             continue
+
+        #         if c_in_id > c_id:
+        #             key = (c_in_id, c_id)
+        #         else:
+        #             key = (c_id, c_in_id)
+
+        #         dist = cache_dist.get(key)
+        #         if dist is None:
+        #             dist = calculate_distance_between_clusters(all_clusters[c_in_id], all_clusters[c_id], dist_matrix, entity_id2idx_dict)
+        #             cache_dist[key] = dist
+
+        #         if dist < min_dist:
+        #             min_dist = dist
+        #             nearest_cluster_ids = (c_in_id, c_id)
+
+        logger.debug("selected dist: {} - pair: {}".format(min_dist, nearest_cluster_ids))
 
         new_cluster = Cluster.from_iter(itertools.chain(all_clusters[nearest_cluster_ids[0]], all_clusters[nearest_cluster_ids[1]]))
         new_cluster_id = len(all_clusters)
 
+        logger.debug("new_cluster ({}): {}".format(new_cluster_id, new_cluster))
         all_clusters.append(new_cluster)
         available_cluster_ids.add(new_cluster_id)
 
@@ -98,9 +170,22 @@ def merge_invalid_clusters(clusters, dist_matrix, entity_id2idx_dict, entity_id2
         if len(all_clusters[nearest_cluster_ids[1]]) < max_k:
             invalid_cluster_ids.remove(nearest_cluster_ids[1])
 
+        del cache_dist2[nearest_cluster_ids[0]]
+        del cache_dist2[nearest_cluster_ids[1]]
+
+        for c_in_id, c_sorted_dist in cache_dist2.items():
+            dist = calculate_distance_between_clusters(all_clusters[c_in_id], all_clusters[new_cluster_id], dist_matrix, entity_id2idx_dict)
+
+            c_sorted_dist.add((dist, new_cluster_id))
+
         if len(new_cluster) < max_k:
             invalid_cluster_ids.add(new_cluster_id)
 
+            sorted_dist = initialize_sorted_dist(all_clusters, new_cluster_id, invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict)
+            cache_dist2[new_cluster_id] = sorted_dist
+
+        logger.debug("invalid_cluster_ids: {}".format(invalid_cluster_ids))
+        logger.debug("cache_dist2: {}".format(cache_dist2))
         logger.info("num invalid clusters: {} in {}".format(len(invalid_cluster_ids), time.time() - start_time))
 
     final_clusters = Clusters()
@@ -111,7 +196,7 @@ def merge_invalid_clusters(clusters, dist_matrix, entity_id2idx_dict, entity_id2
     # raise Exception()
     return final_clusters
 
-def find_min_distance(start, stop, all_clusters, list_invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict):
+def find_min_distance(start, stop, all_clusters, list_invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict, cache_dist):
     min_dist = sys.maxsize
     nearest_cluster_ids = None
 
@@ -122,18 +207,25 @@ def find_min_distance(start, stop, all_clusters, list_invalid_cluster_ids, avail
             if c_id == c_in_id:
                 continue
 
+            if c_in_id > c_id:
+                    key = (c_in_id, c_id)
+            else:
+                key = (c_id, c_in_id)
+
+            dist = cache_dist.get(key)
+            if dist is None:
+                dist = calculate_distance_between_clusters(all_clusters[c_in_id], all_clusters[c_id], dist_matrix, entity_id2idx_dict)
+                cache_dist[key] = dist
+
             dist = calculate_distance_between_clusters(all_clusters[c_in_id], all_clusters[c_id], dist_matrix, entity_id2idx_dict)
 
             if dist < min_dist:
                 min_dist = dist
                 nearest_cluster_ids = (c_in_id, c_id)
 
-    return min_dist, nearest_cluster_ids
+    return min_dist, nearest_cluster_ids, cache_dist
 
-def calculate_min_distance(all_clusters, invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict, num_workers):
-
-    list_invalid_cluster_ids = list(invalid_cluster_ids)
-
+def calculate_min_distance_parallel(all_clusters, list_invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict, cache_dist, num_workers):
     size = int(len(list_invalid_cluster_ids) / num_workers)
     sub_invalid_cluster_ids = []
     start = 0
@@ -148,130 +240,50 @@ def calculate_min_distance(all_clusters, invalid_cluster_ids, available_cluster_
 
     logger.debug(sub_invalid_cluster_ids)
 
-    results = Parallel(n_jobs=8)(delayed(find_min_distance)(start, stop, all_clusters, list_invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict) for (start, stop) in sub_invalid_cluster_ids)
+    results = Parallel(n_jobs=8)(delayed(find_min_distance)(start, stop, all_clusters, list_invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict, cache_dist) for (start, stop) in sub_invalid_cluster_ids)
 
     logger.debug(results)
 
     min_dist = sys.maxsize
     nearest_cluster_ids = None
 
-    for dist, pair in results:
+    for dist, pair, sub_cache_dist in results:
         if dist < min_dist:
             min_dist = dist
             nearest_cluster_ids = pair
+
+        cache_dist.update(sub_cache_dist)
 
     logger.debug(nearest_cluster_ids)
 
     return nearest_cluster_ids
 
-def merge_invalid_clusters1(clusters, dist_matrix, entity_id2idx_dict, entity_id2k_dict):
-    max_k, valid_cluster_ids, invalid_cluster_ids = get_valid_and_invalid_clusters_ids(clusters, entity_id2k_dict)
-
-    all_clusters = [cluster.copy() for cluster in clusters]
-    all_cluster_ids = set(range(len(clusters)))
-
-    sorted_clusters_dist = SortedList()
-    num_invalid_clusters = len(invalid_cluster_ids)
-
-    logger.info("finding nearest clusters for {}/{} invalid ones".format(len(invalid_cluster_ids), len(all_clusters)))
-
-    for idx, cid1 in enumerate(invalid_cluster_ids):
-        # logger.info("found nearest cluster for {}/{}".format(idx, len(invalid_clusters_ids)))
-        cluster1 = all_clusters[cid1]
+def calculate_min_distance(all_clusters, invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict, cache_dist, num_workers):
+    if num_workers > 1:
+        return calculate_min_distance_parallel(all_clusters, invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict, cache_dist, num_workers)
+    else:
         min_dist = sys.maxsize
-        min_cluster_id = None
+        nearest_cluster_ids = None
 
-        for cid2, cluster2 in enumerate(all_clusters):
-            # cluster2 = clusters[cidx2]
-            if cid2 <= cid1:
-                continue
+        for c_in_id in invalid_cluster_ids:
+            for c_id in available_cluster_ids:
+                if c_id == c_in_id:
+                    continue
 
-            dist = calculate_distance_between_clusters(cluster1, cluster2, dist_matrix, entity_id2idx_dict)
+                if c_in_id > c_id:
+                    key = (c_in_id, c_id)
+                else:
+                    key = (c_id, c_in_id)
 
-            if dist < min_dist:
-                min_dist = dist
-                min_cluster_id = cid2
+                dist = cache_dist.get(key)
+                if dist is None:
+                    dist = calculate_distance_between_clusters(all_clusters[c_in_id], all_clusters[c_id], dist_matrix, entity_id2idx_dict)
 
+                if dist < min_dist:
+                    min_dist = dist
+                    nearest_cluster_ids = (c_in_id, c_id)
 
-        sorted_clusters_dist.add((dist, cid1, min_cluster_id))
-
-    new_invalid_clusters_ids = set(invalid_cluster_ids)
-    # new_invalid_clusters_ids.extend(invalid_clusters_ids)
-
-    logger.debug("sorted clusters dist: {}".format(sorted_clusters_dist))
-    availability = [True for _ in all_clusters]
-
-    logger.info("merging invalid clusters for max_k={}".format(max_k))
-    while len(new_invalid_clusters_ids) > 0:
-        logger.debug("new_clusters: {}".format(all_clusters))
-        # logger.debug("new_valid_clusters_ids: {}".format(new_valid_clusters_ids))
-        logger.debug("new_invalid_clusters_ids: {}".format(new_invalid_clusters_ids))
-        # logger.debug(sorted_clusters_dist)
-        # logger.debug("availability: {}".format(availability))
-        logger.debug("num_invalid_clusters: {}".format(num_invalid_clusters))
-
-        smallest_dist, cid1, cid2 = sorted_clusters_dist.pop(0)
-
-        # logger.debug("smallest_dist: {} - cidx1: {} - cidx2: {}".format(smallest_dist, cidx1, cidx2))
-
-        if availability[cid1] and availability[cid2]:
-            c1 = all_clusters[cid1]
-            c2 = all_clusters[cid2]
-
-            cluster = Cluster.from_iter(itertools.chain(c1, c2))
-            logger.debug("c1({}): {} - c2({}): {} - c: {}".format(cid1, c1, cid2, c2, cluster))
-
-            availability[cid1] = False
-            availability[cid2] = False
-
-            if cid1 in new_invalid_clusters_ids:
-                new_invalid_clusters_ids.remove(cid1)
-
-            if cid2 in new_invalid_clusters_ids:
-                new_invalid_clusters_ids.remove(cid2)
-
-
-            all_clusters.append(cluster)
-            availability.append(True)
-            new_cluster_idx = len(all_clusters) - 1
-
-            logger.debug("removing invalid dists")
-            idx2 = 0
-            selected_cluster_ids = [cid1, cid2]
-            n_removed_dists = 0
-            while idx2 < len(sorted_clusters_dist):
-                _, cid1_new, cid2_new = sorted_clusters_dist[idx2]
-                if cid1_new in selected_cluster_ids or cid2_new in selected_cluster_ids:
-                    sorted_clusters_dist.pop(idx2)
-                    n_removed_dists += 1
-                idx2 += 1
-            logger.debug("removed {}".format(n_removed_dists))
-
-            logger.debug("updating distances")
-            is_new_cluster_invalid = len(cluster) < max_k
-            if is_new_cluster_invalid:
-                new_invalid_clusters_ids.add(new_cluster_idx)
-            n_added_dists = 0
-            for idx2 in range(len(all_clusters) - 1):
-                if availability[idx2]:
-                    logger.debug("added distance: {}".format((dist, idx2, new_cluster_idx)))
-                    dist = calculate_distance_between_clusters(all_clusters[new_cluster_idx], all_clusters[idx2], dist_matrix, entity_id2idx_dict)
-
-                    sorted_clusters_dist.add((dist, new_cluster_idx, idx2))
-                    n_added_dists += 1
-
-
-            logger.info("remaining invalid clusters: {} - {} (added: {} - removed: {})".format(len(new_invalid_clusters_ids), len(sorted_clusters_dist), n_added_dists, n_removed_dists))
-
-
-    new_available_clusters = Clusters()
-    for cid, cluster in enumerate(all_clusters):
-        if availability[cid]:
-            new_available_clusters.add_cluster(cluster)
-
-    logger.debug(new_available_clusters)
-    # raise Exception()
-    return new_available_clusters
+        return nearest_cluster_ids
 
 def calculate_distance_between_clusters(invalid_cluster1, invalid_cluster2, dist_matrix, entity_id2idx_dict):
     dist = 0
