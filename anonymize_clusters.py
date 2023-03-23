@@ -15,6 +15,7 @@ def add_arguments(parser):
     rutils.add_clustering_argument(parser)
     rutils.add_cluster_constraint_enforcer_argument(parser)
     rutils.add_log_argument(parser)
+    rutils.add_workers_argument(parser)
 
 
 def main(args):
