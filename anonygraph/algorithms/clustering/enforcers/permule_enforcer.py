@@ -22,6 +22,7 @@ class PermuleEnforcer(BaseEnforcer):
         logger.info("before enforcing")
         # tutils.print_invalid_and_big_clusters(clusters, entity_id2k_dict)
 
+        logger.info("finding valid and invalid clusters")
         valid_clusters_ids, invalid_clusters_ids = get_valid_and_invalid_clusters_ids(clusters, entity_id2k_dict)
         logger.debug("clusters: {}".format(clusters))
         logger.debug("valid clusters: {}".format(valid_clusters_ids))
@@ -37,6 +38,8 @@ class PermuleEnforcer(BaseEnforcer):
         new_dist_matrix = calculate_dnearest_dist_matrix(dist_matrix, dnearest_seq, k_seq)
         # raise Exception()
         # merge
+
+        logger.info("merging invalid clusters")
         new_clusters = merge_invalid_clusters(clusters, invalid_clusters_ids, new_dist_matrix, entity_id2idx_dict, entity_id2k_dict)
 
         # test invalid clusters
@@ -75,8 +78,14 @@ def merge_invalid_clusters(clusters, invalid_clusters_ids, dist_matrix, entity_i
     num_invalid_clusters = len(invalid_clusters_ids)
     max_k = max(entity_id2k_dict.values())
 
-    for cid1 in invalid_clusters_ids:
+    logger.info("finding nearest clusters for {}/{} invalid ones".format(len(invalid_clusters_ids), len(new_clusters)))
+
+    for idx, cid1 in enumerate(invalid_clusters_ids):
+        logger.info("found nearest cluster for {}/{}".format(idx, len(invalid_clusters_ids)))
         cluster1 = new_clusters[cid1]
+        min_dist = sys.maxsize
+        min_cluster_id = None
+
         for cid2, cluster2 in enumerate(new_clusters):
             # cluster2 = clusters[cidx2]
             if cid2 <= cid1:
@@ -84,7 +93,12 @@ def merge_invalid_clusters(clusters, invalid_clusters_ids, dist_matrix, entity_i
 
             dist = calculate_distance_between_clusters(cluster1, cluster2, dist_matrix, entity_id2idx_dict)
 
-            sorted_clusters_dist.add((dist, cid1, cid2))
+            if dist < min_dist:
+                min_dist = dist
+                min_cluster_id = cid2
+
+
+        sorted_clusters_dist.add((dist, cid1, min_cluster_id))
 
     new_invalid_clusters_ids = set(invalid_clusters_ids)
     # new_invalid_clusters_ids.extend(invalid_clusters_ids)
@@ -92,8 +106,10 @@ def merge_invalid_clusters(clusters, invalid_clusters_ids, dist_matrix, entity_i
     logger.debug("sorted clusters dist: {}".format(sorted_clusters_dist))
     availability = [True for _ in new_clusters]
 
-    logger.debug("max_k: {}".format(max_k))
+    logger.info("merging invalid clusters for max_k={}".format(max_k))
     while num_invalid_clusters > 0:
+        logger.info("remaining invalid clusters: {} - {}".format(num_invalid_clusters, len(new_invalid_clusters_ids)))
+
         logger.debug("new_clusters: {}".format(new_clusters))
         logger.debug("new_valid_clusters_ids: {}".format(new_valid_clusters_ids))
         logger.debug("new_invalid_clusters_ids: {}".format(new_invalid_clusters_ids))
