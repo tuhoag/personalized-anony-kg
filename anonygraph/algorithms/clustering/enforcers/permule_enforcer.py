@@ -3,6 +3,7 @@ import logging
 import numpy as np
 import sys
 from sortedcontainers import SortedList
+from joblib import Parallel, delayed
 
 import anonygraph.utils.test as tutils
 from anonygraph.algorithms import cluster, clustering
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 class PermuleEnforcer(BaseEnforcer):
     def __init__(self, args):
         super().__init__(PERMULE_ENFORCER, args)
-        self.num_workers = args["workers"]
+        self.num_workers = int(args[0])
 
     def call(self, clusters, dist_matrix, entity_id2idx_dict, entity_idx2id_dict, entity_id2k_dict):
         # invalid removal
@@ -79,26 +80,7 @@ def merge_invalid_clusters(clusters, dist_matrix, entity_id2idx_dict, entity_id2
     cache_dist = {}
     while(len(invalid_cluster_ids) > 0):
         logger.info("num invalid clusters: {}".format(len(invalid_cluster_ids)))
-        min_dist = sys.maxsize
-        nearest_cluster_ids = None
-
-        for c_in_id in invalid_cluster_ids:
-            for c_id in available_cluster_ids:
-                if c_id == c_in_id:
-                    continue
-
-                if c_in_id < c_id:
-                    key = (c_in_id, c_id)
-                else:
-                    key = (c_id, c_in_id)
-                dist = cache_dist.get(key)
-                if dist is None:
-                    dist = calculate_distance_between_clusters(all_clusters[c_in_id], all_clusters[c_id], dist_matrix, entity_id2idx_dict)
-                    cache_dist[key] = dist
-
-                if dist < min_dist:
-                    min_dist = dist
-                    nearest_cluster_ids = (c_in_id, c_id)
+        nearest_cluster_ids = calculate_min_distance(all_clusters, invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict, num_workers)
 
         new_cluster = Cluster.from_iter(itertools.chain(all_clusters[nearest_cluster_ids[0]], all_clusters[nearest_cluster_ids[1]]))
         new_cluster_id = len(all_clusters)
@@ -126,27 +108,56 @@ def merge_invalid_clusters(clusters, dist_matrix, entity_id2idx_dict, entity_id2
     # raise Exception()
     return final_clusters
 
-def calculate_min_distance(all_clusters, invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict):
-    cache_dist = {}
+def find_min_distance(start, stop, all_clusters, list_invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict):
     min_dist = sys.maxsize
     nearest_cluster_ids = None
-    for c_in_id in invalid_cluster_ids:
+
+    for c_in_idx in range(start, stop + 1):
+        c_in_id = list_invalid_cluster_ids[c_in_idx]
+
         for c_id in available_cluster_ids:
             if c_id == c_in_id:
                 continue
 
-            if c_in_id < c_id:
-                key = (c_in_id, c_id)
-            else:
-                key = (c_id, c_in_id)
-            dist = cache_dist.get(key)
-            if dist is None:
-                dist = calculate_distance_between_clusters(all_clusters[c_in_id], all_clusters[c_id], dist_matrix, entity_id2idx_dict)
-                cache_dist[key] = dist
+            dist = calculate_distance_between_clusters(all_clusters[c_in_id], all_clusters[c_id], dist_matrix, entity_id2idx_dict)
 
             if dist < min_dist:
                 min_dist = dist
                 nearest_cluster_ids = (c_in_id, c_id)
+
+    return min_dist, nearest_cluster_ids
+
+def calculate_min_distance(all_clusters, invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict, num_workers):
+
+    list_invalid_cluster_ids = list(invalid_cluster_ids)
+
+    size = int(len(list_invalid_cluster_ids) / num_workers)
+    sub_invalid_cluster_ids = []
+    start = 0
+    stop = size
+    for i in range(num_workers - 1):
+        stop = min(start + size - 1, len(list_invalid_cluster_ids))
+        sub_invalid_cluster_ids.append((start, stop))
+
+        start = stop + 1
+
+    sub_invalid_cluster_ids.append((start, len(list_invalid_cluster_ids) - 1))
+
+    logger.debug(sub_invalid_cluster_ids)
+
+    results = Parallel(n_jobs=8)(delayed(find_min_distance)(start, stop, all_clusters, list_invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict) for (start, stop) in sub_invalid_cluster_ids)
+
+    logger.debug(results)
+
+    min_dist = sys.maxsize
+    nearest_cluster_ids = None
+
+    for dist, pair in results:
+        if dist < min_dist:
+            min_dist = dist
+            nearest_cluster_ids = pair
+
+    logger.debug(nearest_cluster_ids)
 
     return nearest_cluster_ids
 
