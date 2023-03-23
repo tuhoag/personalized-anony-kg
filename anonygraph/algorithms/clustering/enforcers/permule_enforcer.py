@@ -1,5 +1,6 @@
 import itertools
 import logging
+import time
 import numpy as np
 import sys
 from sortedcontainers import SortedList
@@ -79,7 +80,7 @@ def merge_invalid_clusters(clusters, dist_matrix, entity_id2idx_dict, entity_id2
 
     cache_dist = {}
     while(len(invalid_cluster_ids) > 0):
-        logger.info("num invalid clusters: {}".format(len(invalid_cluster_ids)))
+        start_time = time.time()
         nearest_cluster_ids = calculate_min_distance(all_clusters, invalid_cluster_ids, available_cluster_ids, dist_matrix, entity_id2idx_dict, num_workers)
 
         new_cluster = Cluster.from_iter(itertools.chain(all_clusters[nearest_cluster_ids[0]], all_clusters[nearest_cluster_ids[1]]))
@@ -99,6 +100,8 @@ def merge_invalid_clusters(clusters, dist_matrix, entity_id2idx_dict, entity_id2
 
         if len(new_cluster) < max_k:
             invalid_cluster_ids.add(new_cluster_id)
+
+        logger.info("num invalid clusters: {} in {}".format(len(invalid_cluster_ids), time.time() - start_time))
 
     final_clusters = Clusters()
     for c_id in available_cluster_ids:
