@@ -1,0 +1,5 @@
+anony_mode,calgo_str,handler_str,calgo,range_k,max_k,gen_str,info_loss_args_str,alpha_adm,za,gen,sample,min_k,alpha_dm,enforcer,info_loss,enforcer_str,max_dist,data,gen_n,adm,dm,am,removed_entities,num_raw_entities,is_invalid_anonymity_clusters,num_big_clusters,radm
+anony,hdbscan#max,n,hdbscan,5,50,"zipf#5,50,5,2","0.50,0.50",0.5,2.0,zipf,-1,5,0.5,ms,adm,ms#1.00,1.0,coil,0.0,0.15293540485999124,0.15115482063156482,0.15115482063156482,0.0,5822.0,0.0,0.0,0.15293540485999124
+anony,km#max,n,km,5,50,"zipf#5,50,5,2","0.50,0.50",0.5,2.0,zipf,-1,5,0.5,ms,adm,ms#1.00,1.0,coil,0.0,0.15757989276175102,0.15116938248167477,0.15116938248167477,0.0,5822.0,0.0,0.0,0.15757989276175102
+anony,permule,n,permule,5,50,"zipf#5,50,5,2","0.50,0.50",0.5,2.0,zipf,-1,5,0.5,permule,adm,permule,,coil,0.0,0.2128136084262556,0.20693195587975663,0.20693195587975663,0.0,5822.0,0.0,43.0,0.2128136084262556
+anony,vac,n,vac,5,50,"zipf#5,50,5,2","0.50,0.50",0.5,2.0,zipf,-1,5,0.5,ms,adm,ms#1.00,1.0,coil,0.0,0.06710359529078419,0.04192146870733834,0.04192146870733834,0.0,5822.0,0.0,0.0,0.06710359529078419
