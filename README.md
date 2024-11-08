@@ -68,3 +68,17 @@ To visualize resuts, you can run the file visualize_outputs.py. The following co
 python visualize_outputs.py --data_list=freebase,yago --refresh=y,y --src_type=graphs --exp_names=vac,ms,compare --workers=1
 ```
 This visualization firstly collects anonymized knowledge graphs. Secondly, it aggregates results of anonymized knowledge graphs generated with the same setting but different generation ```gen_n```. In particular the above code refresh data from both steps. If you finished the first and only one to aggregate the data again, you can pass ```refresh=n,y```. If you only want to visualize, ```refresh=n,n```.
+
+# Citation
+If this project is interested for you, please cite our paper:
+```
+@ARTICLE{peranonygraph,
+  author={Hoang, Anh-Tu and Carminati, Barbara and Ferrari, Elena},
+  journal={IEEE Transactions on Dependable and Secure Computing}, 
+  title={Protecting Privacy in Knowledge Graphs With Personalized Anonymization}, 
+  year={2024},
+  volume={21},
+  number={4},
+  pages={2181-2193},
+  doi={10.1109/TDSC.2023.3300360}}
+```
